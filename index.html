@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard Emendas Federais</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#2c3e50,#3498db);min-height:100vh;padding:20px}
+.container{max-width:1600px;margin:0 auto}
+header{background:white;padding:30px;border-radius:10px;margin-bottom:30px;box-shadow:0 4px 6px rgba(0,0,0,0.1)}
+h1{color:#2c3e50;margin-bottom:10px;font-size:2em}
+.subtitle{color:#666}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin:20px 0}
+.stat-card{background:white;padding:15px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);text-align:center}
+.stat-value{font-size:1.5em;color:#3498db;font-weight:bold;margin:10px 0}
+.stat-label{color:#666;font-size:0.9em}
+.table-container{background:white;padding:20px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);margin:20px 0;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:0.9em}
+th{background:#3498db;color:white;padding:12px;text-align:left;font-weight:600}
+td{padding:12px;border-bottom:1px solid #eee}
+tr:hover{background:#f5f5f5}
+.footer{text-align:center;padding:15px;background:#f0f0f0;border-top:1px solid #ddd;margin-top:20px;font-size:0.9em;color:#666}
+</style></head><body>
+<div class="container">
+<header>
+<h1>📊 Dashboard Emendas Federais e Estaduais</h1>
+<p class="subtitle">Teresina/PI — 2025 e 2026</p>
+</header>
+
+<div id="stats" class="stats"></div>
+
+<div class="table-container">
+<h3 style="margin-bottom:15px;color:#333">Listagem de Emendas</h3>
+<table>
+<thead><tr><th>Parlamentar</th><th>Ano</th><th>Processo</th><th>Proposta</th><th>Objeto</th><th>Local de Execução</th><th>Empenhado</th><th>Pago</th><th>%</th><th>Situação</th></tr></thead>
+<tbody id="tableBody"></tbody>
+</table>
+</div>
+
+<div class="footer">Última atualização: <strong>10/09/2026 às 10:43:44</strong></div>
+</div>
+
+<script>
+const emendas = [];
+
+function formatMoeda(v){
+  return new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(v);
+}
+
+function renderTable(){
+  let html = "";
+  emendas.forEach(e=>{
+    html += `<tr><td>${e.parlamentar}</td><td>${e.ano}</td><td>${e.processo}</td><td>${e.proposta}</td><td>${e.projeto}</td><td>${e.localExecucao}</td><td>${formatMoeda(e.valorEmpenhado)}</td><td>${formatMoeda(e.valorPago)}</td><td>${e.percentualPago}%</td><td>${e.situacao}</td></tr>`;
+  });
+  document.getElementById("tableBody").innerHTML = html;
+}
+
+function updateStats(){
+  let tot_emp = emendas.reduce((s,e)=>s+e.valorEmpenhado,0);
+  let tot_pag = emendas.reduce((s,e)=>s+e.valorPago,0);
+  let perc = (tot_emp>0 ? tot_pag/tot_emp*100 : 0).toFixed(2);
+  
+  document.getElementById("stats").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value">${emendas.length}</div>
+      <div class="stat-label">Total de Emendas</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${formatMoeda(tot_emp)}</div>
+      <div class="stat-label">Empenhado</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${formatMoeda(tot_pag)}</div>
+      <div class="stat-label">Pago</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${perc}%</div>
+      <div class="stat-label">Percentual</div>
+    </div>
+  `;
+}
+
+window.addEventListener("DOMContentLoaded", ()=>{
+  renderTable();
+  updateStats();
+});
+</script>
+</body></html>
