@@ -1,0 +1,35 @@
+name: Update Dashboard Federal
+
+on:
+  schedule:
+    - cron: '0 11,17,20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Download CSV
+        run: |
+          mkdir -p data
+          curl -sL "https://docs.google.com/spreadsheets/d/1dQgvDxcX_gnlvrzQyqOkEmFJrp_8wyGM9AYd-qB4X-E/export?format=csv" -o data/emendas.csv
+          wc -l data/emendas.csv
+      
+      - name: Process and Generate HTML
+        run: python3 scripts/update.py
+      
+      - name: Commit and Push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add -A
+          git commit -m "Update dashboard federal $(date -u '+%d/%m/%Y %H:%M:%S UTC')" || true
+          git push
